@@ -1,6 +1,6 @@
 {
   "name": "usage-guard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tracks 5-hour and 7-day usage limits, warns as they climb, and blocks new subagents near the cap",
   "author": {
     "name": "CJ"
