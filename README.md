@@ -44,11 +44,16 @@ This uses the `agent.spawn` hook of the mod API, which runs before a subagent st
 
 ```
 /usage-guard                 readings, thresholds, blocking state
+/usage-guard ui              open the usage panel
 /usage-guard warn <1-100>    warn when a window reaches this percent used
 /usage-guard cap <1-100>     block new subagents at or above this percent used
 /usage-guard block on|off    refuse new subagents at the cap, or warn only
 /usage-guard reset           drop these changes and use the plugin options
 ```
+
+### The usage panel
+
+`/usage-guard ui` opens a panel with a meter for each window (the percent and a word - ok, warning or at cap - are written beside it, never color alone), the reset times, the warn level and cap, and whether new subagents are blocked right now. Buttons change the warn level and the cap in steps of 5, turn blocking on or off, and reset to the plugin options; keys 1 to 6 press them, and Esc closes the panel. The panel redraws as new readings arrive, and anything changed there is the same as changing it with the commands below (it is kept on your machine and applies to every session). A change that would put the warn level above the cap is refused with the reason shown in the panel. Where the panel cannot open (for example no screen attached), the command prints the text readout instead.
 
 The warn level cannot be set above the cap, or the cap below the warn level; the command says so and changes nothing. Changes are kept on your machine and apply to every session.
 
@@ -70,7 +75,7 @@ Set them with `/plugin configure usage-guard@claude-usage-guard` in a terminal s
 - **It fails open.** If the guard hits an error of its own, the subagent starts and the error goes to the debug log, so a bug cannot take subagents away.
 - **Only two windows.** The 5-hour and 7-day windows are used. Any other limit Claude Code reports (for example a gateway's spend limit) is ignored.
 - **The mod API is early access.** It was written against the mod API types shipped with Claude Code 2.1.317 and its tests run with `claude plugin test` from 2.1.316. A future release can change or remove hooks; if `agent.spawn` goes away, blocking would stop working and only the warnings would remain.
-- **Not tested here yet:** a live interactive session with real usage near the cap, the install route through the marketplace, the config menu's number fields, how the toast and status line look in the desktop app and VS Code, and running next to usage-hud. See Development for what is tested.
+- **Not tested here yet:** a live interactive session with real usage near the cap, the install route through the marketplace, the config menu's number fields, how the toast, status line and the `/usage-guard ui` panel look in the terminal, the desktop app and VS Code (the panel is tested in the mod test kit only), and running next to usage-hud. See Development for what is tested.
 
 ## Works with usage-hud
 

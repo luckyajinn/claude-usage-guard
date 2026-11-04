@@ -167,6 +167,7 @@ export function resolveSettings(options: Readonly<Record<string, unknown>>, over
 export type Command =
   | { kind: 'status' }
   | { kind: 'help' }
+  | { kind: 'ui' }
   | { kind: 'reset' }
   | { kind: 'warn'; value: number }
   | { kind: 'cap'; value: number }
@@ -184,6 +185,7 @@ export function parseCommand(args: string): Command {
   const head = t[0]
   if (head === undefined || head === 'status' || head === 'show') return { kind: 'status' }
   if (head === 'help' || head === '--help' || head === '-h' || head === '?') return { kind: 'help' }
+  if (head === 'ui' || head === 'panel' || head === 'open') return { kind: 'ui' }
   if (head === 'reset') return { kind: 'reset' }
   if (head === 'warn' || head === 'cap') {
     const value = parsePercent(t[1])
@@ -206,6 +208,7 @@ export function applyCommand(cmd: Command, overrides: Overrides, current: Settin
   switch (cmd.kind) {
     case 'status':
     case 'help':
+    case 'ui':
       return keep(null)
     case 'error':
       return keep(`${cmd.message} Nothing was changed.`)
@@ -291,6 +294,18 @@ export const overCap = (states: readonly WindowState[], s: Settings): WindowStat
 
 // ---- text ----
 
+/** A text meter, `cells` wide: 83% of 20 is 17 filled cells. The percent is always written beside it by the caller. */
+export function meter(percent: number, cells = 20): string {
+  const filled = Math.max(0, Math.min(cells, Math.round((percent / 100) * cells)))
+  return '█'.repeat(filled) + '░'.repeat(cells - filled)
+}
+
+/** How far one press of a panel button moves the warn level or the cap. */
+export const PANEL_STEP = 5
+
+/** `value` moved by `delta`, kept to 1..100 (the range the settings take). */
+export const stepped = (value: number, delta: number): number => Math.min(100, Math.max(1, Math.round(value + delta)))
+
 /** 83 -> "83%", 83.5 -> "83.5%". */
 export function pct(n: number): string {
   return `${Math.round(n * 10) / 10}%`
@@ -361,6 +376,7 @@ export function nextClear(hit: readonly WindowState[]): number | null {
 export const HELP = [
   'Commands:',
   '  /usage-guard                 this readout',
+  '  /usage-guard ui              open the usage panel (live meters, buttons for the settings)',
   '  /usage-guard warn <1-100>    warn when a window reaches this percent used',
   '  /usage-guard cap <1-100>     block new subagents at or above this percent used',
   '  /usage-guard block on|off    refuse new subagents at the cap, or warn only',

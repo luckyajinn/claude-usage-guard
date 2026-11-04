@@ -10,6 +10,7 @@ import {
   formatDuration,
   freshFlags,
   mergeReadings,
+  meter,
   noticeText,
   nextClear,
   parseCommand,
@@ -21,6 +22,7 @@ import {
   resolveSettings,
   statesOf,
   statusLine,
+  stepped,
   windowState,
 } from './guard'
 import type { Settings, WindowState } from './guard'
@@ -355,4 +357,25 @@ test('the readout shows readings, thresholds and whether blocking is active', ()
   const none = commandText({ ...base, reading: null })
   expect(none).toContain('No usage readings yet')
   expect(none).toContain('Blocking is not active.')
+})
+
+test('the ui command opens the panel and changes nothing', () => {
+  for (const word of ['ui', 'UI', 'panel', 'open']) expect(parseCommand(word)).toEqual({ kind: 'ui' })
+  const applied = applyCommand({ kind: 'ui' }, { warnAt: 70 }, DEFAULTS)
+  expect(applied).toEqual({ overrides: { warnAt: 70 }, changed: false, message: null })
+})
+
+test('the meter fills in proportion and always has the same width', () => {
+  expect(meter(0, 10)).toBe('░'.repeat(10))
+  expect(meter(50, 10)).toBe('█'.repeat(5) + '░'.repeat(5))
+  expect(meter(100, 10)).toBe('█'.repeat(10))
+  expect(meter(250, 10)).toBe('█'.repeat(10))
+  expect(meter(-5, 10)).toBe('░'.repeat(10))
+  expect(Array.from(meter(83)).length).toBe(20)
+})
+
+test('a panel step stays within 1 to 100', () => {
+  expect(stepped(80, 5)).toBe(85)
+  expect(stepped(98, 5)).toBe(100)
+  expect(stepped(3, -5)).toBe(1)
 })

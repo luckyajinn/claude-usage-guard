@@ -339,3 +339,101 @@ test('with no readings the command says so instead of showing zeros', async ($, 
   expect(text).toContain('No usage readings yet')
   expect(text).toContain('Blocking is not active.')
 })
+
+// ---- the panel (/usage-guard ui) ----
+
+const PANEL = {
+  plugin: 'usage-guard',
+  component: 'Pane',
+  requestId: 'usage-guard',
+  props: { title: 'Usage guard', isFocused: true, bodyColumns: 70, placement: 'dock', scroll: { offset: 0, bodyRows: 20 }, view: {} },
+} as const
+
+test('/usage-guard ui opens the panel, asking for the keyboard', async ($, on) => {
+  engine(on)
+  const opened: unknown[] = []
+  on('ui.open', (_, e) => {
+    opened.push(e)
+    return { value: { isPlaced: true } }
+  })
+  await $.session.start(START)
+  const { text } = await $.command.run(slash('ui'))
+  expect(text).toContain('panel opened')
+  expect(opened).toHaveLength(1)
+  expect(opened[0]).toMatchObject({ id: 'usage-guard', focus: true, closeOnEscape: true })
+})
+
+test('where the panel cannot open, /usage-guard ui gives the readout instead', async ($, on) => {
+  engine(on, { usage: [five(83)] })
+  on('ui.open', () => ({ value: { isPlaced: false, reason: 'no-surface' } }))
+  await $.session.start(START)
+  const { text } = await $.command.run(slash('ui'))
+  expect(text).toContain('could not open here')
+  expect(text).toContain('5-hour')
+  expect(text).toContain('83% used')
+})
+
+test('the panel shows both windows with a meter, the percent in words and the reset time', async ($, on) => {
+  engine(on, { usage: [five(96), seven(41)] })
+  await $.session.start(START)
+  for (const surface of ['terminal', 'desktop', 'vscode'] as const) {
+    const ui = await $.ui.mount({ ...PANEL, surface })
+    expect((await ui.find({ type: 'Text', text: /5-hour.*96%.*at cap.*resets in 1h 12m/ }))?.text).toBeDefined()
+    expect((await ui.find({ type: 'Text', text: /7-day.*41%.*ok.*resets in 3d/ }))?.text).toBeDefined()
+    expect((await ui.find({ type: 'Text', text: /BLOCKED now/ }))?.text).toBeDefined()
+    await ui.unmount()
+  }
+})
+
+test('the panel with no reading says so and nothing is blocked', async ($, on) => {
+  engine(on)
+  await $.session.start(START)
+  const ui = await $.ui.mount({ ...PANEL, surface: 'terminal' })
+  expect(await ui.findAll({ type: 'Text', text: /no reading yet/ })).toHaveLength(2)
+  expect((await ui.find({ type: 'Text', text: /allowed/ }))?.text).toBeDefined()
+  await ui.unmount()
+})
+
+test('panel buttons change the cap, the warn level and blocking, and save them', async ($, on) => {
+  const w = engine(on, { usage: [five(83)] })
+  await $.session.start(START)
+  const ui = await $.ui.mount({ ...PANEL, surface: 'terminal' })
+
+  await ui.press({ key: 'cap-down' })
+  expect(w.seen.disk.get('overrides')).toEqual({ blockAt: 90 })
+  expect((await ui.find({ type: 'Text', text: /cap 90%/ }))?.text).toBeDefined()
+
+  await ui.press({ key: 'warn-down' })
+  expect(w.seen.disk.get('overrides')).toEqual({ blockAt: 90, warnAt: 75 })
+
+  await ui.press({ key: 'block' })
+  expect((w.seen.disk.get('overrides') as { blockSubagents: boolean }).blockSubagents).toBe(false)
+  expect((await ui.find({ type: 'Text', text: /never blocked/ }))?.text).toBeDefined()
+
+  await ui.press({ key: 'reset' })
+  expect(w.seen.disk.has('overrides')).toBe(false)
+  expect((await ui.find({ type: 'Text', text: /cap 95%/ }))?.text).toBeDefined()
+  await ui.unmount()
+})
+
+test('a panel change that is refused leaves the settings alone and says why', { options: { warnAt: 90, blockAt: 90 } }, async ($, on) => {
+  const w = engine(on)
+  await $.session.start(START)
+  const ui = await $.ui.mount({ ...PANEL, surface: 'terminal' })
+  await ui.press({ key: 'cap-down' })
+  expect(w.seen.disk.has('overrides')).toBe(false)
+  expect((await ui.find({ type: 'Text', text: /cannot be below the warn level/ }))?.text).toBeDefined()
+  await ui.unmount()
+})
+
+test('a panel change takes effect on the next subagent', async ($, on) => {
+  engine(on, { usage: [five(85)] })
+  await $.session.start(START)
+  expect((await $.agent.spawn(SPAWN)).agentId).toBe('a1')
+  const ui = await $.ui.mount({ ...PANEL, surface: 'terminal' })
+  await ui.press({ key: 'warn-down' })
+  await ui.press({ key: 'cap-down' })
+  await ui.press({ key: 'cap-down' })
+  expect((await $.agent.spawn(SPAWN)).deny).toContain('85% cap')
+  await ui.unmount()
+})

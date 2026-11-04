@@ -20,6 +20,10 @@ declare module 'claude-code' {
     'usage-guard': {
       /** Session memory of which notices were shown, so each threshold crossing speaks once. */
       flags: Flags
+      /** Bumped whenever the panel's figures may have changed, so an open panel redraws. */
+      tick: number
+      /** The last line a panel button produced (for example a refused change); empty when none. */
+      note: string
     }
   }
 }
