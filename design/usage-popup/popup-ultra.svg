@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 338" width="720" height="338" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">Usage warning in a terminal dialog, Ultra plan, weekly limit only, override available</title>
+  <desc id="dsc">A monospace dialog inside a terminal window titled "You're about to run out of usage", with a small "Ultra" plan label in the header. The Ultra plan has no 5-hour session limit, so there is no session row. Weekly (7-day) is 90% used, 22 of 24 meter cells filled, resets in 3d 4h, with an enabled, unticked checkbox "Keep going past the limit". A risk note says that if you override, Claude can use up to 100%, and at 100% it stops until that window resets, possibly mid-task. The keyboard menu has "[w] Wait for reset" highlighted by default with a greater-than marker, then "[k] Override weekly limit", enabled and unticked, and "[esc] Cancel". No padlock is shown. The checkbox is unticked.</desc>
+  <!-- Meter rounding: filled cells = round(24 x percent / 100), nearest. 90% = 21.6 -> 22 of 24. -->
+  <style>
+    :root {
+      --win: #FBF8F3;
+      --bar: #EFE8DD;
+      --edge: #D8CFC2;
+      --dot: #CBBFAF;
+      --fg: #231E19;
+      --dim: #5E554B;
+      --off: #766C60;
+      --accent: #A9481A;
+      --on-accent: #FFF8EF;
+      --empty: #8F8478;
+      --rule: #A89D8E;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --win: #14110F;
+        --bar: #1E1A17;
+        --edge: #2F2924;
+        --dot: #4A423A;
+        --fg: #ECE6DD;
+        --dim: #A89F94;
+        --off: #877E74;
+        --accent: #E8915A;
+        --on-accent: #14110F;
+        --empty: #6E645A;
+        --rule: #4A423A;
+      }
+    }
+    text { font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: var(--fg); }
+    .b { font-weight: 700; }
+    .h { font-size: 16px; font-weight: 700; }
+    .sm { font-size: 12px; }
+    .dim { fill: var(--dim); }
+    .off { fill: var(--off); }
+    .acc { fill: var(--accent); }
+    .sel { fill: var(--on-accent); }
+    .win-fill { fill: var(--win); }
+    .win-edge { fill: none; stroke: var(--edge); stroke-width: 1; }
+    .bar { fill: var(--bar); }
+    .bar-line { stroke: var(--edge); stroke-width: 1; }
+    .dot { fill: var(--dot); }
+    .dialog { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+    .rule { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 3; fill: none; }
+    .tree { stroke: var(--rule); stroke-width: 1; fill: none; }
+    .spark { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; fill: none; }
+    .cells { stroke: var(--accent); stroke-width: 14; stroke-dasharray: 7 2; fill: none; }
+    .cell-empty { fill: none; stroke: var(--empty); stroke-width: 1; }
+    .note-bar { fill: var(--accent); }
+    .sel-bg { fill: var(--accent); }
+    .badge { fill: none; stroke: var(--accent); stroke-width: 1.25; }
+  </style>
+
+  <!-- Terminal window -->
+  <rect class="win-fill" x="0.5" y="0.5" width="719" height="337" rx="10"/>
+  <path class="bar" d="M0.5 26.5V10.5A10 10 0 0 1 10.5 0.5H709.5A10 10 0 0 1 719.5 10.5V26.5Z"/>
+  <line class="bar-line" x1="0.5" y1="26.5" x2="719.5" y2="26.5"/>
+  <circle class="dot" cx="18" cy="13.5" r="4.5"/>
+  <circle class="dot" cx="34" cy="13.5" r="4.5"/>
+  <circle class="dot" cx="50" cy="13.5" r="4.5"/>
+  <rect class="win-edge" x="0.5" y="0.5" width="719" height="337" rx="10"/>
+
+  <!-- Dialog border, one stroke -->
+  <rect class="dialog" x="24" y="38" width="672" height="284" rx="8"/>
+
+  <!-- Header: neutral asterisk mark, title, and Ultra plan label -->
+  <g transform="translate(51 60.5)">
+    <path class="spark" d="M0 -7V7"/>
+    <path class="spark" d="M-6.06 -3.5L6.06 3.5"/>
+    <path class="spark" d="M-6.06 3.5L6.06 -3.5"/>
+  </g>
+  <text class="h" x="68" y="66">You're about to run out of usage</text>
+  <rect class="badge" x="616" y="50" width="60" height="20" rx="4"/>
+  <text class="sm b acc" x="646" y="64.5" text-anchor="middle">Ultra</text>
+
+  <!-- Subtitle -->
+  <text class="dim" x="44" y="90">Claude will pause new work near your limit</text>
+  <text class="dim" x="44" y="108">so you don't get cut off mid-task.</text>
+  <line class="rule" x1="44" y1="122" x2="676" y2="122"/>
+
+  <!-- Weekly only: Ultra has no 5-hour session limit. 90% used, 22 of 24 cells, override enabled -->
+  <text x="44" y="146">Weekly (7-day)</text>
+  <line class="cells" x1="184" y1="141" x2="380" y2="141"/>
+  <rect class="cell-empty" x="382.5" y="134.5" width="6" height="13"/>
+  <rect class="cell-empty" x="391.5" y="134.5" width="6" height="13"/>
+  <text class="b" x="412" y="146">90% used</text>
+  <text class="dim" x="496" y="146">Resets in 3d 4h</text>
+  <path class="tree" d="M48 152V161.5H58"/>
+  <text x="64" y="166">[ ]</text>
+  <text x="100" y="166">Keep going past the limit</text>
+
+  <!-- Risk note -->
+  <rect class="note-bar" x="44" y="186" width="3" height="36" rx="1.5"/>
+  <text x="58" y="198">If you override, Claude can use up to 100%.</text>
+  <text x="58" y="216">At 100% it stops until that window resets, possibly mid-task.</text>
+  <line class="rule" x1="44" y1="232" x2="676" y2="232"/>
+
+  <!-- Keyboard menu: first row selected (default, safe) -->
+  <rect class="sel-bg" x="32" y="239" width="656" height="24" rx="3"/>
+  <text class="sel b" x="44" y="255">&gt;</text>
+  <text class="sel b" x="100" y="255">[w] Wait for reset</text>
+
+  <text x="64" y="279">[ ]</text>
+  <text x="100" y="279">[k] Override weekly limit</text>
+
+  <text x="100" y="303">[esc] Cancel</text>
+</svg>
