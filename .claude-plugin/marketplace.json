@@ -1,0 +1,6 @@
+{
+  "name": "claude-usage-guard",
+  "owner": { "name": "CJ" },
+  "description": "usage-guard, a Claude Code mod that warns near your usage limits and blocks new subagents at the cap",
+  "plugins": [{ "name": "usage-guard", "source": "./", "description": "Tracks 5-hour and 7-day usage limits, warns, and blocks new subagents near the cap" }]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "usage-guard",
+  "version": "0.1.0",
+  "description": "Tracks 5-hour and 7-day usage limits, warns as they climb, and blocks new subagents near the cap",
+  "author": {
+    "name": "CJ"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "warnAt": {
+      "type": "number",
+      "title": "Warn at (% used)",
+      "description": "Show one warning when the 5-hour or 7-day window reaches this percent used",
+      "default": 80,
+      "min": 1,
+      "max": 100
+    },
+    "blockAt": {
+      "type": "number",
+      "title": "Block new subagents at (% used)",
+      "description": "Refuse to start new subagents while the 5-hour or 7-day window is at or above this percent used",
+      "default": 95,
+      "min": 1,
+      "max": 100
+    },
+    "blockSubagents": {
+      "type": "boolean",
+      "title": "Block new subagents at the cap",
+      "description": "Off means warnings only; nothing is ever blocked",
+      "default": true
+    }
+  },
+  "repository": "https://github.com/luckyajinn/claude-usage-guard",
+  "homepage": "https://github.com/luckyajinn/claude-usage-guard"
+}
